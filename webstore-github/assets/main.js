@@ -1,17 +1,9 @@
-// ======================================================================================
-// !!! PENTING: GANTI URL DI BAWAH INI DENGAN URL WEB APP ANDA DARI LANGKAH DEPLOYMENT !!!
-// ======================================================================================
 const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbz0F9MXojB_QgfvX59_Gh6FlDjLZFbKzRa05GV0CvEoYJ28ybsZRez6HIVagozsjV90/exec';
-// ======================================================================================
-
-
-/* GANTI DENGAN NOMOR WHATSAPP ADMIN ANDA (gunakan format 62, bukan 0) */
 const ADMIN_WHATSAPP_NUMBER = '6281290156936';
-
 const PRICING_RULES = {
-  "KP": { /* Aturan ini berlaku untuk produk yang ID-nya diawali "KP" */
+  "KP": { 
     tiers: [
-      { minQty: 5, price: 129000 }, /* Jika kuantitas 5+, harga per item 129.000 */
+      { minQty: 5, price: 129000 }, 
     ]
   }
 };
@@ -23,11 +15,10 @@ const VOUCHER_CODES = {
   }
 };
 
-// --- Perubahan dimulai di sini ---
 
 document.addEventListener('DOMContentLoaded', () => {
 
-  // Fungsi yang memuat produk dari API Google Apps Script
+
   function fetchAndRenderProducts() {
     const productContainer = document.getElementById('product-container');
     if (!productContainer) return;
@@ -36,12 +27,12 @@ document.addEventListener('DOMContentLoaded', () => {
     const loadingContainer = document.getElementById('loading-container');
     const category = document.body.dataset.category;
 
-    if (!category) return; // Hanya jalankan jika ada kategori
+    if (!category) return; 
 
-    // Mulai animasi progress bar
+
     setTimeout(() => { progressBar.style.width = '90%'; }, 100);
 
-    // Menggunakan fetch untuk memanggil API
+   
     fetch(`${WEB_APP_URL}?action=getProducts&category=${category}`)
       .then(response => response.json())
       .then(response => {
@@ -101,11 +92,11 @@ document.addEventListener('DOMContentLoaded', () => {
       checkoutBtn.disabled = true;
       checkoutBtn.textContent = 'Memproses...';
 
-      // Menggunakan fetch untuk mengirim data checkout
+      
       fetch(WEB_APP_URL, {
         method: 'POST',
         headers: {
-          'Content-Type': 'text/plain;charset=utf-8', // Diperlukan untuk Apps Script
+          'Content-Type': 'text/plain;charset=utf-8', 
         },
         body: JSON.stringify(orderData) 
       })
@@ -132,9 +123,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
   
-  // --- Kode lainnya tetap sama, tidak perlu diubah ---
-  // (Salin semua fungsi lainnya dari JavaScript.html Anda ke sini, 
-  // seperti renderProducts, formatPhoneNumber, getCart, saveCart, dll.)
+ 
   
   function formatPhoneNumber(phoneNumber) { if (!phoneNumber) return ''; let cleanNumber = String(phoneNumber).trim(); cleanNumber = cleanNumber.replace(/[^0-9]/g, ''); if (cleanNumber.startsWith('62')) { cleanNumber = '0' + cleanNumber.substring(2); } return cleanNumber; }
   function renderProducts(products) { const productContainer = document.getElementById('product-container'); if (!productContainer) return; productContainer.innerHTML = ''; const groupedProducts = products.reduce((acc, product) => { acc[product.productId] = acc[product.productId] || []; acc[product.productId].push(product); return acc; }, {}); for (const productId in groupedProducts) { const productVariants = groupedProducts[productId]; const mainProduct = productVariants[0]; const totalStock = productVariants.reduce((sum, variant) => sum + variant.stock, 0); let sizeOptionsHtml = ''; if (mainProduct.size !== '-') { productVariants.forEach(variant => { const stockStatus = variant.stock > 0 ? variant.stock + ' tersisa' : 'Habis'; const disabled = variant.stock === 0 ? 'disabled' : ''; sizeOptionsHtml += '<option value="' + variant.size + '" ' + disabled + '>' + variant.size + ' (' + stockStatus + ')</option>'; }); } const isOutOfStock = totalStock === 0; const productCard = document.createElement('div'); productCard.className = 'product-item-card ' + (isOutOfStock ? 'out-of-stock' : ''); let productHTML = '<img src="' + mainProduct.image + '" alt="' + mainProduct.name + '" class="product-image">'; productHTML += '<div class="product-info">'; productHTML += '<div class="product-name">' + mainProduct.name + '</div>'; productHTML += '<div class="product-price">Rp ' + mainProduct.price.toLocaleString('id-ID') + '</div>'; if (sizeOptionsHtml) { productHTML += '<div class="size-selector-container">'; productHTML += '<label for="size-' + productId + '">Ukuran:</label>'; productHTML += '<select name="size" id="size-' + productId + '" class="size-selector">' + sizeOptionsHtml + '</select>'; productHTML += '</div>'; } productHTML += '<div class="add-to-cart-controls">'; productHTML += '<button id="btn-' + productId + '" class="add-to-cart-btn" onclick="addToCartFromDynamic(this, \'' + productId + '\')" ' + (isOutOfStock ? 'disabled' : '') + '>'; productHTML += isOutOfStock ? 'Stok Habis' : '+ Keranjang'; productHTML += '</button>'; productHTML += '</div></div>'; productCard.innerHTML = productHTML; productContainer.appendChild(productCard); } }
@@ -160,14 +149,15 @@ document.addEventListener('DOMContentLoaded', () => {
   function initializeSlider() { const slider = document.querySelector('.slider'); if (!slider) return; const slides = Array.from(slider.children); if(slides.length <=1) return; const slideCount = slides.length; let currentIndex = 1; let intervalId; let isDragging = false, startPos = 0, currentTranslate = 0, prevTranslate = 0; const firstClone = slides[0].cloneNode(true); const lastClone = slides[slideCount - 1].cloneNode(true); slider.appendChild(firstClone); slider.insertBefore(lastClone, slides[0]); const getSlideWidth = () => slider.parentElement ? slider.parentElement.offsetWidth : 0; const setInitialPosition = () => { slider.style.transition = 'none'; const slideWidth = getSlideWidth(); currentTranslate = -currentIndex * slideWidth; slider.style.transform = 'translateX(' + currentTranslate + 'px)'; prevTranslate = currentTranslate; setTimeout(() => { slider.style.transition = 'transform 0.5s ease-in-out'; }, 50); }; setInitialPosition(); slider.addEventListener('transitionend', () => { const slideWidth = getSlideWidth(); if (currentIndex === slides.length + 1) { slider.style.transition = 'none'; currentIndex = 1; currentTranslate = -currentIndex * slideWidth; slider.style.transform = 'translateX(' + currentTranslate + 'px)'; prevTranslate = currentTranslate; } if (currentIndex === 0) { slider.style.transition = 'none'; currentIndex = slides.length; currentTranslate = -currentIndex * slideWidth; slider.style.transform = 'translateX(' + currentTranslate + 'px)'; prevTranslate = currentTranslate; } setTimeout(() => { slider.style.transition = 'transform 0.5s ease-in-out'; }, 50); }); const goToSlide = () => { const slideWidth = getSlideWidth(); currentTranslate = -currentIndex * slideWidth; slider.style.transform = 'translateX(' + currentTranslate + 'px)'; prevTranslate = currentTranslate; }; const nextSlide = () => { currentIndex++; goToSlide(); }; const startAutoSlide = () => { stopAutoSlide(); intervalId = setInterval(nextSlide, 3000); }; const stopAutoSlide = () => { clearInterval(intervalId); }; const dragStart = (e) => { stopAutoSlide(); isDragging = true; startPos = e.type.includes('mouse') ? e.pageX : e.touches[0].clientX; slider.style.transition = 'none'; } const drag = (e) => { if (!isDragging) return; const currentPosition = e.type.includes('mouse') ? e.pageX : e.touches[0].clientX; currentTranslate = prevTranslate + (currentPosition - startPos); slider.style.transform = 'translateX(' + currentTranslate + 'px)'; } const dragEnd = () => { if (!isDragging) return; isDragging = false; const movedBy = currentTranslate - prevTranslate; if (movedBy < -100) currentIndex++; if (movedBy > 100) currentIndex--; slider.style.transition = 'transform 0.5s ease-in-out'; goToSlide(); startAutoSlide(); }
   slider.addEventListener('mousedown', dragStart); slider.addEventListener('touchstart', dragStart); slider.addEventListener('mouseup', dragEnd); slider.addEventListener('touchend', dragEnd); slider.addEventListener('mouseleave', dragEnd); slider.addEventListener('mousemove', drag); slider.addEventListener('touchmove', drag); window.addEventListener('resize', setInitialPosition); startAutoSlide(); }
 
-  // INISIALISASI HALAMAN
+
   const pageId = document.body.id;
   if (pageId === 'page-keranjang') { renderCartPage(); }
-  if (pageId === 'page-produk') { fetchAndRenderProducts(); } // Panggil fungsi baru ini
+  if (pageId === 'page-produk') { fetchAndRenderProducts(); } 
   
   initializeNavMenu();
   updateCartIcon();
   initializeImageModal();
   initializeSlider();
   initializePromoPopup();
+
 });
